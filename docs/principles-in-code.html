@@ -1,0 +1,838 @@
+<!doctype html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}</style>
+<title>Principles in Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one slide per screen, a ledger-like frame; each principle owns a colour (the same five the harness page uses). */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #142133;
+  --muted: #5a6779;
+  --line: #d6dde7;
+  --code-bg: #eaeef4;
+  --p0: #4b5d75;
+  --p1: #51708e; --p1-soft: #e3ebf3;
+  --p2: #85617f; --p2-soft: #f0e7ee;
+  --p3: #ab4f59; --p3-soft: #f6e4e6;
+  --p4: #9f5b45; --p4-soft: #f6e8e2;
+  --p5: #5c7446; --p5-soft: #e6eedf;
+  --ok: #3f7a4a; --no: #b2414c;
+  --f-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111821; --surface: #18212d; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2c3848; --code-bg: #1f2a38;
+    --p0: #9fb0c6;
+    --p1: #8fb0d0; --p1-soft: #1c2a3a; --p2: #c7a2c0; --p2-soft: #2b2130; --p3: #d9808a; --p3-soft: #33202a;
+    --p4: #e2a089; --p4-soft: #33251f; --p5: #a9c592; --p5-soft: #212c1d; --ok: #8cc797; --no: #ec8c95;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111821; --surface: #18212d; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2c3848; --code-bg: #1f2a38;
+  --p0: #9fb0c6;
+  --p1: #8fb0d0; --p1-soft: #1c2a3a; --p2: #c7a2c0; --p2-soft: #2b2130; --p3: #d9808a; --p3-soft: #33202a;
+  --p4: #e2a089; --p4-soft: #33251f; --p5: #a9c592; --p5-soft: #212c1d; --ok: #8cc797; --no: #ec8c95;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: clamp(14px, 1.05vw + 8px, 18px); line-height: 1.5; }
+* { box-sizing: border-box; }
+
+.deck { height: 100%; display: flex; flex-direction: column; }
+.stage { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
+.slide { display: none; min-height: 100%; padding-block: clamp(20px, 4vh, 48px); padding-inline: clamp(16px, 5vw, 72px); border-left: 6px solid var(--pc, var(--p0)); }
+.slide.on { display: flex; flex-direction: column; gap: clamp(14px, 2.2vh, 24px); }
+.slide[data-p="1"] { --pc: var(--p1); --ps: var(--p1-soft); }
+.slide[data-p="2"] { --pc: var(--p2); --ps: var(--p2-soft); }
+.slide[data-p="3"] { --pc: var(--p3); --ps: var(--p3-soft); }
+.slide[data-p="4"] { --pc: var(--p4); --ps: var(--p4-soft); }
+.slide[data-p="5"] { --pc: var(--p5); --ps: var(--p5-soft); }
+.slide:not([data-p]) { --pc: var(--p0); --ps: var(--code-bg); }
+.inner { width: 100%; max-width: 1180px; margin-inline: auto; display: flex; flex-direction: column; gap: clamp(14px, 2.2vh, 26px); flex: 1; }
+@media (prefers-reduced-motion: no-preference) { .slide.on .inner { animation: rise .35s ease-out both; } }
+@keyframes rise { from { transform: translateY(8px); opacity: .6; } to { transform: none; opacity: 1; } }
+
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tag { font-family: var(--f-mono); font-size: .72em; letter-spacing: .06em; text-transform: uppercase; color: var(--pc); font-weight: 600; }
+.count { font-family: var(--f-mono); font-size: .72em; color: var(--muted); font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.015em; }
+h1 { font-size: clamp(2.1em, 4.5vw, 3.6em); line-height: 1.05; font-weight: 800; }
+h2 { font-size: clamp(1.6em, 3vw, 2.4em); line-height: 1.1; font-weight: 800; }
+h3 { font-size: 1.05em; font-weight: 700; }
+p { margin: 0; }
+.lede { font-size: 1.15em; color: var(--muted); max-width: 62ch; }
+.big { font-family: var(--f-display); font-weight: 700; font-size: clamp(1.4em, 2.6vw, 2em); line-height: 1.2; max-width: 30ch; text-wrap: balance; }
+.small { font-size: .85em; color: var(--muted); }
+code, .mono { font-family: var(--f-mono); font-size: .86em; }
+code { background: var(--code-bg); padding: .08em .35em; border-radius: 4px; }
+pre { margin: 0; background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-family: var(--f-mono); font-size: .78em; line-height: 1.55; }
+pre code { background: none; padding: 0; font-size: 1em; }
+.hl { color: var(--pc); font-weight: 600; }
+.k { color: var(--muted); }
+strong { font-weight: 600; }
+
+.cols { display: grid; gap: clamp(12px, 2vw, 22px); grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); align-items: start; }
+.cols.lw { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+.cols.lw2 { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+@media (max-width: 760px) { .cols, .cols.lw, .cols.lw2 { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.card.tint { background: var(--ps); border-color: transparent; }
+.card .sym { font-size: 1.6em; line-height: 1; color: var(--pc); font-family: var(--f-display); }
+ul.clean { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+ul.clean li { padding-left: 1.1em; position: relative; }
+ul.clean li::before { content: ""; position: absolute; left: 0; top: .62em; width: .45em; height: .45em; border-radius: 2px; background: var(--pc); }
+ul.clean.no li::before { background: var(--no); border-radius: 50%; }
+ul.clean.yes li::before { background: var(--ok); border-radius: 50%; }
+
+/* flow: boxes joined by arrows; stacks on narrow screens */
+.flow { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; }
+.flow > .node { flex: 1 1 0; min-width: 120px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.flow > .node.key { border-color: var(--pc); box-shadow: inset 0 0 0 1px var(--pc); }
+.flow > .node b { font-family: var(--f-display); font-size: 1em; }
+.flow > .node span { font-size: .82em; color: var(--muted); }
+.flow > .arr { align-self: center; color: var(--pc); font-family: var(--f-mono); padding-inline: 6px; font-size: 1.1em; }
+@media (max-width: 760px) { .flow { flex-direction: column; } .flow > .arr { transform: rotate(90deg); padding-block: 2px; } }
+
+/* gate pipeline */
+.gate { display: flex; flex-direction: column; gap: 6px; counter-reset: g; }
+.gate > div { display: grid; grid-template-columns: 2.2em minmax(0, 1fr) minmax(0, 1.3fr); gap: 12px; align-items: baseline; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.gate > div::before { counter-increment: g; content: counter(g); font-family: var(--f-mono); font-weight: 600; color: var(--pc); }
+.gate > div > span:last-child { font-size: .82em; color: var(--muted); font-style: italic; }
+.gate > div.pass { background: var(--ps); border-color: transparent; }
+.gate > div.pass::before { content: "✓"; }
+@media (max-width: 760px) { .gate > div { grid-template-columns: 2em minmax(0, 1fr); } .gate > div > span:last-child { grid-column: 2; } }
+
+/* stack (layers) */
+.stack { display: flex; flex-direction: column-reverse; gap: 6px; }
+.stack > div { display: grid; grid-template-columns: 1.6em minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px 14px; border-radius: 8px; background: var(--ls, var(--code-bg)); border-left: 5px solid var(--lc, var(--p0)); }
+.stack .n { font-family: var(--f-mono); font-weight: 600; color: var(--lc, var(--p0)); }
+.stack .pkg { font-family: var(--f-mono); font-size: .78em; color: var(--muted); }
+.stack .name b { font-family: var(--f-display); }
+.stack .name span { color: var(--muted); font-size: .88em; }
+@media (max-width: 600px) { .stack > div { grid-template-columns: 2.4em minmax(0, 1fr); } .stack .pkg { grid-column: 2; } }
+
+table.t { width: 100%; border-collapse: collapse; font-size: .88em; }
+table.t th, table.t td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.t th { font-family: var(--f-mono); font-size: .8em; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+table.t td.c { text-align: center; }
+.tw { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 4px 8px; }
+.y { color: var(--ok); font-weight: 600; } .x { color: var(--no); font-weight: 600; }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 10px; font-size: .82em; white-space: nowrap; }
+.chip.p { border-color: var(--pc); color: var(--pc); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill-p { display: inline-block; border-radius: 6px; padding: 2px 8px; font-family: var(--f-mono); font-size: .75em; font-weight: 600; color: var(--surface); background: var(--pc); }
+
+.where { margin-top: auto; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--f-mono); font-size: .72em; color: var(--muted); }
+.where::before { content: "In the repo →"; color: var(--pc); font-weight: 600; }
+
+.without { display: flex; flex-direction: column; gap: 6px; }
+.quote { font-family: var(--f-display); font-size: 1.2em; font-weight: 700; color: var(--ink); }
+
+/* annotated answer */
+.answer { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; font-size: 1.1em; line-height: 1.9; }
+.fig { border-bottom: 2px solid var(--pc); font-weight: 600; padding-inline: 2px; }
+.fig.plain { border-bottom: 2px dotted var(--muted); font-weight: 500; }
+.trail { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: var(--f-mono); font-size: .78em; }
+.trail > span { background: var(--ps); border-radius: 6px; padding: 4px 8px; }
+.trail > i { color: var(--pc); font-style: normal; }
+
+/* title slide */
+.ps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.ps > div { border-top: 5px solid var(--c); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.ps b { font-family: var(--f-display); font-size: 1.05em; }
+.ps span { font-size: .86em; color: var(--muted); }
+.ps i { font-style: normal; font-family: var(--f-mono); font-size: .75em; color: var(--c); font-weight: 600; }
+@media (max-width: 900px) { .ps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .ps { grid-template-columns: minmax(0, 1fr); } }
+
+/* svg diagrams */
+.svgw { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.svgw svg { display: block; min-width: 640px; width: 100%; height: auto; }
+svg text { font-family: var(--f-body); fill: var(--ink); }
+svg .mut { fill: var(--muted); }
+svg .mono { font-family: var(--f-mono); }
+svg .box { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+svg .box4 { fill: var(--p4-soft); stroke: var(--p4); stroke-width: 1.5; }
+svg .new { fill: var(--p4-soft); stroke: var(--p4); stroke-width: 2; }
+svg .trunk { stroke: var(--p0); stroke-width: 4; fill: none; }
+svg .br { stroke: var(--p4); stroke-width: 2.5; fill: none; }
+svg .dead { stroke: var(--muted); stroke-width: 2; fill: none; stroke-dasharray: 5 5; opacity: .6; }
+svg .rv { stroke: var(--p5); stroke-width: 2.5; fill: none; }
+svg .nd { fill: var(--p0); }
+svg .nd4 { fill: var(--p4); }
+svg .nd5 { fill: var(--p5); }
+svg .arrow { stroke: var(--p4); stroke-width: 2; fill: none; }
+svg .arrowhead { fill: var(--p4); }
+svg .acc { fill: var(--p4); font-weight: 600; }
+svg .strike { fill: var(--muted); text-decoration: line-through; }
+
+/* nav */
+.bar { display: flex; align-items: center; gap: 10px; padding: 8px clamp(12px, 3vw, 24px); padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: var(--surface); }
+.bar button { font: inherit; font-size: .85em; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+.bar button:hover { border-color: var(--muted); }
+.bar button:focus-visible, .toc a:focus-visible { outline: 2px solid var(--p1); outline-offset: 2px; }
+.prog { flex: 1; height: 6px; background: var(--code-bg); border-radius: 3px; overflow: hidden; }
+.prog > i { display: block; height: 100%; width: 0; background: var(--cur, var(--p0)); transition: width .25s; }
+.bar .lbl { font-family: var(--f-mono); font-size: .75em; color: var(--muted); min-width: 4.5em; text-align: right; font-variant-numeric: tabular-nums; }
+.toc { position: absolute; inset: 0; background: var(--bg); padding: 24px clamp(16px, 5vw, 72px); overflow-y: auto; z-index: 5; }
+.toc ol { max-width: 900px; margin: 0 auto; padding: 0; list-style: none; columns: 2 320px; column-gap: 28px; }
+.toc li { break-inside: avoid; }
+.toc a { display: flex; gap: 10px; padding: 7px 4px; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+.toc a:hover { color: var(--p1); }
+.toc a i { font-style: normal; font-family: var(--f-mono); font-size: .8em; color: var(--muted); min-width: 2em; padding-top: .15em; }
+.toc a b { width: 4px; border-radius: 2px; background: var(--c); flex: none; }
+</style>
+
+<div class="deck">
+<main class="stage" id="stage">
+
+<!-- ============ OPENING ============ -->
+<section class="slide" data-title="Five principles, in code">
+<div class="inner">
+  <div class="top"><span class="tag">Financial Advisor Harness · AI Engineer NYC 2026</span><span class="count"></span></div>
+  <h1>Five principles,<br>and where they live in the code</h1>
+  <p class="big">The model proposes. Fixed code decides what counts.</p>
+  <div class="ps">
+    <div style="--c:var(--p1)"><i>1 · grounding/</i><b>Shared Domain</b><span>Agree the plan before any number.</span></div>
+    <div style="--c:var(--p2)"><i>2 · calc/</i><b>Consistency</b><span>Numbers come only from tested code.</span></div>
+    <div style="--c:var(--p3)"><i>3 · answers/</i><b>Evidence</b><span>Every number can be followed back.</span></div>
+    <div style="--c:var(--p4)"><i>4 · needs_you/</i><b>Accountability</b><span>Ask only where a person must decide.</span></div>
+    <div style="--c:var(--p5)"><i>5 · review/</i><b>Verification</b><span>A reviewer challenges the plan.</span></div>
+  </div>
+  <p class="small">Running example: <code>examples/wedding</code>, paying for a wedding on time. Use ← → keys, swipe, or the buttons below.</p>
+</div>
+</section>
+
+<section class="slide" data-title="One core, five layers">
+<div class="inner">
+  <div class="top"><span class="tag">The shape</span><span class="count"></span></div>
+  <h2>One core, five layers. Each layer is one principle.</h2>
+  <div class="cols lw">
+    <div class="stack">
+      <div><span class="n">0</span><span class="name"><b>Core</b> <span>conversation, 3 lanes, plan state document, decision history</span></span><span class="pkg">core/ model/ ui/</span></div>
+      <div style="--lc:var(--p1);--ls:var(--p1-soft)"><span class="n">1</span><span class="name"><b>The plan</b> <span>interview → agreed brief</span></span><span class="pkg">grounding/</span></div>
+      <div style="--lc:var(--p2);--ls:var(--p2-soft)"><span class="n">2</span><span class="name"><b>Build</b> <span>tested modules, the gate</span></span><span class="pkg">calc/</span></div>
+      <div style="--lc:var(--p3);--ls:var(--p3-soft)"><span class="n">3</span><span class="name"><b>Answers</b> <span>analyst, number check, figures</span></span><span class="pkg">answers/</span></div>
+      <div style="--lc:var(--p4);--ls:var(--p4-soft)"><span class="n">4</span><span class="name"><b>Needs you</b> <span>marks, calls, branches, joins</span></span><span class="pkg">needs_you/</span></div>
+      <div style="--lc:var(--p5);--ls:var(--p5-soft)"><span class="n">5</span><span class="name"><b>Review</b> <span>reviewer, challenges</span></span><span class="pkg">review/</span></div>
+    </div>
+    <div class="card">
+      <h3>Rules that keep it layered</h3>
+      <ul class="clean">
+        <li>Layer N imports only layers <strong>below</strong> N.</li>
+        <li><code>HARNESS_LAYERS=3</code> turns 4 and 5 off. A missing package does the same.</li>
+        <li>The core never names a layer. Each plugs in one <code>Layer</code> object: schema, state keys, actions, chat route, tools, prompt part, hooks.</li>
+        <li>Tests: <code>tests/layerK</code> runs with only layers ≤ K on.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="where"><span>harness/layers.py</span><span>ARCHITECTURE.md §2, §4.3, §7</span></div>
+</div>
+</section>
+
+<section class="slide" data-title="Models propose, code decides">
+<div class="inner">
+  <div class="top"><span class="tag">The split that makes it trustworthy</span><span class="count"></span></div>
+  <h2>Models propose. Code with no model decides what counts.</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>Model roles <span class="small">(prompt files in each package)</span></h3>
+      <ul class="clean">
+        <li><strong>Interviewer</strong>: asks, proposes the plan</li>
+        <li><strong>Spec, example and code writers</strong>: build each step</li>
+        <li><strong>Checker</strong>: a blind second pass on the examples</li>
+        <li><strong>Analyst</strong>: picks modules, writes the reply</li>
+        <li><strong>Side assistant</strong>: talks in branches, proposes changes</li>
+        <li><strong>Reviewer</strong>: raises challenges</li>
+      </ul>
+    </div>
+    <div class="card tint">
+      <h3>Fixed code: no model involved</h3>
+      <ul class="clean">
+        <li>Brief validation (<code>brief.py</code>)</li>
+        <li>Safety read of model-written code (<code>safety.py</code>)</li>
+        <li>The gate and runner (<code>gate.py</code>, <code>runner.py</code>)</li>
+        <li>Fingerprints, stale, registry (<code>registry.py</code>)</li>
+        <li>The number check (<code>provenance.py</code>)</li>
+        <li>Figures, chips, the re-run engine (<code>answers/</code>)</li>
+        <li>Proposal and challenge filters</li>
+      </ul>
+    </div>
+  </div>
+  <p class="small">Only <code>harness/model/</code> imports a provider SDK. Every test runs offline against a <strong>scripted</strong> model, so the fixed code is what gets tested.</p>
+  <div class="where"><span>ARCHITECTURE.md §1 item 9</span><span>harness/model/scripted.py</span></div>
+</div>
+</section>
+
+<section class="slide" data-title="One way in, one way out">
+<div class="inner">
+  <div class="top"><span class="tag">The core</span><span class="count"></span></div>
+  <h2>One way in (actions), one way out (the state document)</h2>
+  <div class="flow">
+    <div class="node"><b>Page · terminal · replay</b><span>all three do the same thing</span></div><div class="arr">→</div>
+    <div class="node key"><b>Action</b><span><code>POST /api/act</code><br>say, accept_plan, build, choose…</span></div><div class="arr">→</div>
+    <div class="node"><b>Lanes</b><span>main · side · review<br>one job at a time each</span></div><div class="arr">→</div>
+    <div class="node"><b>SQLite</b><span>rows + an append-only <code>events</code> log</span></div><div class="arr">→</div>
+    <div class="node key"><b>Plan state document</b><span>one JSON, rebuilt on every <code>GET /api/state</code></span></div>
+  </div>
+  <div class="cols" style="--n:3">
+    <div class="card"><h3>Front ends draw only</h3><p class="small">The page never works out a number, a mark or a step line. <code>core/state.py</code> writes them all.</p></div>
+    <div class="card"><h3>Only two things block</h3><p class="small">The <code>waiting</code> slot holds a plan awaiting acceptance or a decision. Everything else runs.</p></div>
+    <div class="card"><h3>Polling, not streaming</h3><p class="small">Page polls every 1s while busy, 5s idle; redraws only when <code>version</code> moves.</p></div>
+  </div>
+  <div class="where"><span>harness/core/session.py</span><span>core/state.py</span><span>core/lanes.py</span><span>ui/server.py</span></div>
+</div>
+</section>
+
+<!-- ============ PRINCIPLE 1 ============ -->
+<section class="slide" data-p="1" data-title="P1 · Shared Domain">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 1 · Shared Domain · layer 1</span><span class="count"></span></div>
+  <h1>Agree the plan before any number.</h1>
+  <p class="big">What is obvious to you is not what the model learned. Start from the goal and work backwards, together.</p>
+  <div class="cols">
+    <div class="card"><h3>Without it</h3><ul class="clean no"><li>The model guesses the problem, then solves the guess.</li><li>No way to tell your words from its inventions.</li><li>Corrections arrive after the numbers.</li></ul></div>
+    <div class="card tint"><h3>With it</h3><ul class="clean yes"><li>A plan diagram: goal, steps, inputs.</li><li>Every item tagged with where it came from.</li><li>Nothing is built until you click <strong>Accept plan</strong>.</li></ul></div>
+  </div>
+  <div class="where"><span>harness/grounding/</span><span>interviewer.md</span><span>SPEC.md §3</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="1" data-title="P1 · Origins">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 1 · How the plan is recorded</span><span class="count"></span></div>
+  <h2>Every item carries an origin, and code checks it</h2>
+  <div class="cols" style="--n:3">
+    <div class="card tint"><span class="sym">❝</span><h3>person</h3><p class="small">Must carry a <code>quote</code> of ≥ 3 characters that really appears in the person's messages (case-folded, spaces collapsed). A made-up quote fails validation.</p></div>
+    <div class="card tint"><span class="sym">↗</span><h3>looked_up</h3><p class="small">The <code>source</code> URL must be one a lookup in <em>this</em> interview returned. Lookups send a short general term only: nothing personal leaves the machine.</p></div>
+    <div class="card tint"><span class="sym">✎</span><h3>proposed</h3><p class="small">The assistant's own idea. Allowed, but shown as such, so you know what to scrutinise.</p></div>
+  </div>
+  <div class="cols" style="--n:2">
+<pre><code><span class="k"># domain_brief.json (the agreed plan)</span>
+goal, mode, scope{in, out}, glossary,
+particulars, inputs, definition_of_done,
+open_questions,
+process: [{id, name,
+  <span class="hl">kind: calculation | judgment | input</span>,
+  method, formula, needs, produces,
+  origin}]</code></pre>
+    <div class="card">
+      <h3><code>validate_brief()</code> also refuses</h3>
+      <ul class="clean small">
+        <li>a step whose <code>needs</code> aren't an input or an <em>earlier</em> step</li>
+        <li>an input no step uses</li>
+        <li>a calculation with no formula, or a method that isn't <code>arithmetic</code> or a sourced glossary term</li>
+      </ul>
+      <p class="small">Errors go back to the interviewer, not to you.</p>
+    </div>
+  </div>
+  <div class="where"><span>harness/grounding/brief.py · validate_brief</span><span>grounding/research.py</span><span>reference/terms.json</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="1" data-title="P1 · Lifecycle of a plan">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 1 · From vague goal to accepted plan</span><span class="count"></span></div>
+  <h2>The plan has four phases, and only your words move it</h2>
+  <div class="flow">
+    <div class="node"><b>empty</b><span>"I want to pay for my wedding"</span></div><div class="arr">→</div>
+    <div class="node"><b>interview</b><span>one question per message · ≤ 12 lookups · <em>Propose the plan now</em> = <code>/wrap</code></span></div><div class="arr">→</div>
+    <div class="node key"><b>proposed</b><span>waits for you. Any message = a correction; the diagram redraws</span></div><div class="arr">→</div>
+    <div class="node key"><b>accepted</b><span>trunk node #1: <em>Plan accepted</em></span></div>
+  </div>
+  <div class="cols" style="--n:3">
+    <div class="card"><h3>Bad brief?</h3><p class="small">Rejected back to the interviewer. Three in a row: saved as a draft and it asks you one question.</p></div>
+    <div class="card"><h3>Changed after acceptance</h3><p class="small"><code>revise_plan</code> runs only on your exact words (<code>change_plan</code> tool: "never on your own idea"). Records node <code>plan_revised</code>.</p></div>
+    <div class="card"><h3>Changed step → stale</h3><p class="small">Each step has a fingerprint. If it changes, the step reads <strong>Stale · rebuild</strong> and its module won't run.</p></div>
+  </div>
+  <div class="where"><span>grounding/interview.py</span><span>grounding/revise.py</span><span>calc/registry.py · plan_fingerprint</span></div>
+</div>
+</section>
+
+<!-- ============ PRINCIPLE 2 ============ -->
+<section class="slide" data-p="2" data-title="P2 · Consistency">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 2 · Consistency · layer 2</span><span class="count"></span></div>
+  <h1>Numbers come only from tested code.</h1>
+  <p class="big">Write the calculation once. Run it the same way every time. The model picks the tool; it never does the arithmetic.</p>
+  <div class="cols">
+    <div class="card"><h3>Without it</h3><ul class="clean no"><li>Arithmetic in the model's head.</li><li>New code for every question.</li><li>Same question, different answer.</li></ul></div>
+    <div class="card tint"><h3>With it</h3><ul class="clean yes"><li>Each calculation step → one module, with tests and worked examples.</li><li>Built unattended, once, after the plan is accepted.</li><li>Every run passes the gate first.</li></ul></div>
+  </div>
+  <div class="where"><span>harness/calc/</span><span>examples/wedding/modules/*</span><span>SPEC.md §4</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="2" data-title="P2 · The build">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 2 · The unattended build, per step</span><span class="count"></span></div>
+  <h2>Four phases, each a separate conversation, kept apart on purpose</h2>
+  <div class="flow">
+    <div class="node"><b>1 · Spec</b><span>inputs, output, formula, plus every way it <em>departs</em> from the plan</span></div><div class="arr">→</div>
+    <div class="node"><b>2 · Worked examples</b><span>3–5, with working, by the example writer</span></div><div class="arr">→</div>
+    <div class="node key"><b>3 · Second pass</b><span>checker answers from the spec alone. Only agreed examples → <code>golden.json</code></span></div><div class="arr">→</div>
+    <div class="node key"><b>4 · Code</b><span>written from the spec alone. Tests + golden must pass → registered</span></div>
+  </div>
+  <div class="tw"><table class="t">
+    <tr><th>Who sees what</th><th>Spec</th><th>Example inputs</th><th>Expected answers</th><th>Working</th><th>Code</th></tr>
+    <tr><td>Example writer</td><td class="c y">✓</td><td class="c y">✓</td><td class="c y">writes</td><td class="c y">writes</td><td class="c x">✗</td></tr>
+    <tr><td>Checker (second pass)</td><td class="c y">✓</td><td class="c y">✓</td><td class="c x">✗</td><td class="c x">✗</td><td class="c x">✗</td></tr>
+    <tr><td>Code writer</td><td class="c y">✓</td><td class="c x">✗</td><td class="c x">✗</td><td class="c x">✗</td><td class="c y">writes</td></tr>
+  </table></div>
+  <p class="small">Up to 3 attempts per phase. A step that can't finish ends <strong>not built</strong> with a reason; the build moves on. Nothing waits on you. A mistake both passes make still gets through, so you can approve examples yourself.</p>
+  <div class="where"><span>calc/builder.py</span><span>calc/checker.py</span><span>spec_writer.md · example_writer.md · checker.md · module_writer.md</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="2" data-title="P2 · Safety read">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 2 · Before model-written code is ever run</span><span class="count"></span></div>
+  <h2>The code is read first: a calculation, nothing else</h2>
+  <div class="cols">
+<pre><code><span class="k"># calc/safety.py (ast walk, no model)</span>
+ALLOWED_IMPORTS = {<span class="hl">decimal, datetime, math,
+                   fractions, calendar, statistics</span>}
+FORBIDDEN_NAMES = {eval, exec, compile, open,
+                   input, __import__, getattr,
+                   setattr, globals, print, type …}
+FORBIDDEN_ATTRIBUTES = {<span class="hl">today, now, utcnow</span>}
+<span class="k"># also refused: any __dunder__ access,
+# class, while, try, with, lambda, global</span></code></pre>
+    <div class="cols" style="--n:1">
+      <div class="card"><h3>Why no clock?</h3><p class="small">A module that reads <code>today()</code> gives a different answer tomorrow. Today's date is passed in as an input instead.</p></div>
+      <div class="card"><h3>Then a separate process</h3><p class="small"><code>python -I runner.py &lt;folder&gt;</code>: isolated mode, 30-second timeout, JSON in and out.</p></div>
+      <div class="card"><h3>Honest limit</h3><p class="small">"A check on the code, not a sandbox: it refuses what it recognises."</p></div>
+    </div>
+  </div>
+  <div class="where"><span>calc/safety.py · check_code</span><span>calc/runner.py</span><span>calc/gate.py · _run</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="2" data-title="P2 · The gate">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 2 · The only way a calculation runs</span><span class="count"></span></div>
+  <h2>The gate: seven checks, in this order, on every single run</h2>
+  <div class="gate">
+    <div><span>Is the module registered?</span><span>"There is no registered module called…"</span></div>
+    <div><span>Are its files the ones that passed? (fingerprint)</span><span>"…must be built again."</span></div>
+    <div><span>Is its plan step unchanged and built?</span><span>STALE / NOT_BUILT</span></div>
+    <div><span>Did the caller give assumptions and an expected result?</span><span>"…say what you expect the result to be."</span></div>
+    <div><span>Do the inputs fit the spec's types?</span><span>BAD_INPUTS, with the problems</span></div>
+    <div><span>Do its tests pass <em>right now</em>?</span><span>tests re-run every time, recorded in <code>test_runs</code></span></div>
+    <div class="pass"><span>Run it → row in <code>calc_runs</code></span><span>inputs, assumptions, expected, output, fingerprint, <strong>test_run_id</strong></span></div>
+  </div>
+  <p class="small">Every refusal is an event (<code>calc.refused</code>) and goes back to the model as the tool's error, so it adapts instead of improvising a number.</p>
+  <div class="where"><span>calc/gate.py · call</span><span>calc/registry.py</span><span>tests/layer2/test_build.py</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="2" data-title="P2 · A real module">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 2 · Step 1 of the wedding plan</span><span class="count"></span></div>
+  <h2>What a built step actually is: four small files</h2>
+  <div class="cols">
+<pre><code><span class="k"># modules/wedding_total_cost/module.py</span>
+from decimal import Decimal, ROUND_HALF_UP
+
+def calculate(guest_count, dinner_cost_per_guest,
+              extra_costs):
+    if guest_count &lt; 0:
+        raise ValueError("Guest count cannot be negative.")
+    ...
+    total = Decimal(guest_count) <span class="hl">*</span> dinner_cost_per_guest
+    for item in extra_costs:
+        total += Decimal(str(item["amount"]))
+    return total.quantize(Decimal("0.01"),
+                          rounding=ROUND_HALF_UP)</code></pre>
+<pre><code><span class="k"># golden.json (one of four)</span>
+{"inputs": {"guest_count": "10",
+            "dinner_cost_per_guest": "50",
+            "extra_costs": [{"name": "DJ", "amount": "200"},
+                            {"name": "Bar", "amount": "300"}]},
+ "expected": "1000",
+ "working": "10 x 50 = 500; 200 + 300 = 500;
+             500 + 500 = 1000",
+ "checked_by": <span class="hl">"second_pass"</span>}
+
+<span class="k"># + spec.json (formula, typed inputs)
+# + tests.py  (the code writer's own tests)</span></code></pre>
+  </div>
+  <div class="trail"><span>edit <code>*</code> → <code>+</code></span><i>→</i><span>fingerprint differs</span><i>→</i><span>gate: FILES_CHANGED</span><i>→</i><span>step reads "Stale · rebuild"</span><i>→</i><span>no number</span></div>
+  <div class="where"><span>examples/wedding/modules/wedding_total_cost/</span><span>calc/adopt.py (adopts module folders on load)</span></div>
+</div>
+</section>
+
+<!-- ============ PRINCIPLE 3 ============ -->
+<section class="slide" data-p="3" data-title="P3 · Evidence">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 3 · Evidence · layer 3</span><span class="count"></span></div>
+  <h1>Every number can be followed back.</h1>
+  <p class="big">Not all information is equal. Keep the trail: where each thing came from, and how far to trust it.</p>
+  <div class="cols">
+    <div class="card"><h3>Without it</h3><ul class="clean no"><li>Everything treated as fact.</li><li>A rough guess used as the truth.</li><li>"I ran the numbers." No receipts.</li></ul></div>
+    <div class="card tint"><h3>With it</h3><ul class="clean yes"><li>A number with no source is never shown.</li><li>Each figure links to its run, step and test run.</li><li>Chips under the reply show inputs, assumptions, results.</li></ul></div>
+  </div>
+  <div class="where"><span>harness/answers/</span><span>calc/provenance.py</span><span>SPEC.md §5</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="3" data-title="P3 · The number check">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 3 · A tripwire for made-up numbers</span><span class="count"></span></div>
+  <h2>The number check reads every number before you do</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>A number may come only from</h3>
+      <div class="chips"><span class="chip p">run</span><span class="chip p">data</span><span class="chip p">input</span><span class="chip p">note</span><span class="chip p">brief</span><span class="chip p">person</span><span class="chip p">today</span></div>
+      <ul class="clean small">
+        <li>Reads numbers (<code>43,000</code>, <code>$1.5k</code>, <code>12%</code>) and ISO dates, part by part.</li>
+        <li>Match within half the written precision: <code>1.9k</code> backs anything 1,850–1,950.</li>
+        <li><code>12%</code> also matches <code>0.12</code>.</li>
+        <li>Bare whole numbers 0–12 are skipped ("three payments").</li>
+      </ul>
+    </div>
+    <div class="cols" style="--n:1">
+      <div class="card tint"><h3>1st unbacked reply</h3><p class="small">Sent back to the model, unseen: <em>"[harness] Your reply was not shown. These numbers did not come from… Do not work numbers out yourself: run a module, or leave the number out."</em></p></div>
+      <div class="card tint"><h3>2nd unbacked reply</h3><p class="small">Withheld. You see: <em>"(The answer was held back, because it held numbers that no tested module produced: …)"</em></p></div>
+      <div class="card"><h3>Also on tool inputs</h3><p class="small"><code>run_module</code>, <code>save_input</code>, <code>ask_decision</code>, the side assistant and the reviewer all pass through it.</p></div>
+    </div>
+  </div>
+  <div class="where"><span>calc/provenance.py · unbacked</span><span>answers/agent.py · _run_turn</span><span>"This is not a proof."</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="3" data-title="P3 · A figure's receipt">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 3 · From a number to its receipt</span><span class="count"></span></div>
+  <h2>Click any underlined number: it opens the run that made it</h2>
+  <div class="answer">With <span class="fig plain">150</span> guests the total comes to <span class="fig">43,000</span>, and your monthly surplus is <span class="fig">1,500</span>.</div>
+  <div class="cols" style="--n:3">
+    <div class="card"><h3>150 → <em>person</em></h3><p class="small">Your own words. Backed, but plain text: no step made it.</p></div>
+    <div class="card tint"><h3>43,000 → <em>run</em></h3><div class="trail"><span>r3</span><i>→</i><span>step 1</span><i>→</i><span>test run 11</span></div></div>
+    <div class="card tint"><h3>1,500 → <em>run</em></h3><div class="trail"><span>r4</span><i>→</i><span>step 3</span><i>→</i><span>its test run</span></div></div>
+  </div>
+  <div class="card">
+    <h3><code>provenance.trace()</code> rules</h3>
+    <ul class="clean small">
+      <li>A run is credited only for what it <strong>produced</strong>, never a value it was merely given and passed through.</li>
+      <li>Sources are tried in a fixed order: run, data, input, note, brief, person, today.</li>
+      <li>Each figure in the state: <code>{start, end, text, step, run, input}</code>. The page underlines only figures with a step.</li>
+    </ul>
+  </div>
+  <div class="where"><span>calc/provenance.py · trace, _produced</span><span>answers/figures.py</span><span>tests/layer3/test_evidence.py</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="3" data-title="P3 · Chips and the record">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 3 · Less prose, more receipts</span><span class="count"></span></div>
+  <h2>The harness writes the trail. The model writes one or two sentences.</h2>
+  <div class="card">
+    <p class="small">Under a reply, built from the <code>calc_runs</code> rows, never asked of the model:</p>
+    <div class="chips" style="margin-top:6px">
+      <span class="chip">Guest count <b>150</b></span><span class="chip">Dinner cost per guest <b>230</b></span>
+      <span class="chip">◌ The guest count stays at 150.</span>
+      <span class="chip p">Total cost <b>43,000</b></span><span class="chip p">Monthly surplus <b>1,500</b></span>
+    </div>
+  </div>
+  <div class="cols" style="--n:3">
+    <div class="card"><h3>value</h3><p class="small">Each top-level input no earlier run produced (and not today's date). Same key + same value = one chip.</p></div>
+    <div class="card"><h3>assumption</h3><p class="small">Each sentence the run declared. Layer 4 adds its status: unconfirmed, confirmed, corrected.</p></div>
+    <div class="card"><h3>result</h3><p class="small">One per run, labelled with its step, written exactly as the step line writes it.</p></div>
+  </div>
+  <div class="card tint">
+    <h3>Everything that matters is recorded</h3>
+    <p class="small">Local SQLite. The <code>events</code> table is append-only, prefixed by who wrote it: <code>core.</code> <code>plan.</code> <code>build.</code> <code>ask.</code> <code>you.</code> <code>review.</code> Run <code>python -m harness events</code> to read it. Tests assert event kinds, never wording.</p>
+  </div>
+  <div class="where"><span>answers/layer.py · run_chips</span><span>harness/db.py</span><span>ARCHITECTURE.md §6, §12.7</span></div>
+</div>
+</section>
+
+<!-- ============ PRINCIPLE 4 ============ -->
+<section class="slide" data-p="4" data-title="P4 · Accountability">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 4 · Accountability · layer 4</span><span class="count"></span></div>
+  <h1>Ask only where a person must decide.</h1>
+  <p class="big">Agents face no real-world consequences. You do. Few gates, high signal.</p>
+  <div class="cols">
+    <div class="card"><h3>Without it</h3><ul class="clean no"><li>"The stochastic machine said it was fine."</li><li>Approving every calculation.</li><li>Reviewing everything, so reviewing nothing well.</li></ul></div>
+    <div class="card tint"><h3>With it</h3><ul class="clean yes"><li>Judgement calls stop and ask.</li><li>Assumptions run, but are marked.</li><li>Your figures change only with your yes.</li></ul></div>
+  </div>
+  <div class="where"><span>harness/needs_you/</span><span>side.md</span><span>SPEC.md §6</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="4" data-title="P4 · Three responses">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 4 · Match the interruption to the stakes</span><span class="count"></span></div>
+  <h2>Three kinds of uncertainty, three different responses</h2>
+  <div class="tw"><table class="t">
+    <tr><th>What it is</th><th>What happens</th><th>How it's enforced</th></tr>
+    <tr><td><strong>Arithmetic</strong></td><td>Never asks. A module runs.</td><td>Gate + number check (P2, P3)</td></tr>
+    <tr><td><strong>Assumption</strong><br><span class="small">a value you didn't give</span></td><td>Runs anyway, marked <span class="hl">◌</span>. Under the answer: <em>Confirm</em> or <em>Change it</em>.</td><td><code>marks.py</code>: a value not in your words, a saved input or an earlier result must be listed as an assumption, or the run is sent back (UNLISTED)</td></tr>
+    <tr><td><strong>Your call</strong><br><span class="small">a judgement step, or two readings that conflict</span></td><td>Stops. Question + 2–4 option buttons, a suggestion and why.</td><td><code>calls.py · ask_decision</code>. Sets the <code>waiting</code> slot. Max 2 per message. Answer → trunk node <code>call</code></td></tr>
+  </table></div>
+  <div class="cols" style="--n:2">
+    <div class="card"><h3>Only two things ever block</h3><p class="small">A plan awaiting acceptance, and an open decision. Builds, assumptions and proposals never block.</p></div>
+    <div class="card"><h3>Missing calculation?</h3><p class="small"><code>request_module</code> builds it automatically, shown as "not in the plan". It can't change your figures or the plan's shape.</p></div>
+  </div>
+  <div class="where"><span>needs_you/marks.py</span><span>needs_you/calls.py</span><span>needs_you/requests.py</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="4" data-title="P4 · Proposals">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 4 · Branches</span><span class="count"></span></div>
+  <h2>A branch can only <em>propose</em>. The harness checks. You say yes.</h2>
+  <div class="cols lw2">
+    <div class="card">
+      <h3><code>propose_change</code>: checked with no model</h3>
+      <div class="gate small">
+        <div><span>Your words it rests on are really in this branch</span><span>not_their_words</span></div>
+        <div><span>The target is a real input or plan step</span><span>unknown_input · unknown_step</span></div>
+        <div><span>The new value appears in <em>your</em> messages in this branch</span><span>value_unbacked</span></div>
+        <div><span>The old value is one clear value, and differs</span><span>ambiguous · same</span></div>
+        <div class="pass"><span>Impact computed, proposal stored <em>pending</em></span><span>one per reply</span></div>
+      </div>
+    </div>
+    <div class="cols" style="--n:1">
+      <div class="card tint"><h3>You see</h3><p class="mono">Guest count: 120 → 150</p><p class="small">touches steps 1, 2 · downstream 5, 6, 7</p><p class="small"><strong>Yes</strong> → joins the trunk. <strong>No</strong> → branch dies.</p></div>
+      <div class="card"><h3>Who may join without asking</h3><ul class="clean small"><li>Your buttons (choose, confirm, change it, use this) <em>are</em> your yes.</li><li>The side assistant and analyst: <strong>never</strong>.</li><li>Values typed in the main chat are conversation, not decisions.</li></ul></div>
+    </div>
+  </div>
+  <div class="where"><span>needs_you/side.py</span><span>ARCHITECTURE.md §12.3, §12.6</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="4" data-title="P4 · The join">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 4 · Scenario branch_that_joins</span><span class="count"></span></div>
+  <h2>The join: only what the change reaches runs again, through the gate, with no model</h2>
+  <div class="svgw">
+  <svg viewBox="0 0 900 270" role="img" aria-label="Re-run walk: guest count 120 to 150 re-runs total cost then payment schedule">
+    <text x="20" y="28" class="mut" font-size="13">BEFORE (last answer)</text>
+    <text x="500" y="28" class="mut" font-size="13">AFTER YES (join job)</text>
+    <rect x="20" y="44" width="380" height="74" rx="10" class="box"/>
+    <text x="36" y="70" font-size="14" font-weight="600">r1 · wedding_total_cost (step 1)</text>
+    <text x="36" y="96" font-size="14" class="mono">guest_count <tspan class="acc">120</tspan> → 36,100</text>
+    <rect x="20" y="150" width="380" height="74" rx="10" class="box"/>
+    <text x="36" y="176" font-size="14" font-weight="600">r2 · wedding_payment_schedule (step 2)</text>
+    <text x="36" y="202" font-size="14" class="mono">total <tspan class="acc">36100</tspan> → 6,000 · 15,050 · 15,050</text>
+    <rect x="500" y="44" width="380" height="74" rx="10" class="new"/>
+    <text x="516" y="70" font-size="14" font-weight="600">r3 · same module, re-run</text>
+    <text x="516" y="96" font-size="14" class="mono">guest_count <tspan class="acc">150</tspan> → 43,000</text>
+    <rect x="500" y="150" width="380" height="74" rx="10" class="new"/>
+    <text x="516" y="176" font-size="14" font-weight="600">r4 · re-run with mapped value</text>
+    <text x="516" y="202" font-size="14" class="mono">total <tspan class="acc">43000</tspan> → 6,000 · 18,500 · 18,500</text>
+    <path d="M400 81 L494 81" class="arrow"/><polygon points="494,76 500,81 494,86" class="arrowhead"/>
+    <path d="M400 187 L494 187" class="arrow"/><polygon points="494,182 500,187 494,192" class="arrowhead"/>
+    <path d="M690 118 L690 144" class="arrow"/><polygon points="685,144 690,150 695,144" class="arrowhead"/>
+    <text x="700" y="138" font-size="12" class="acc">36100 ↦ 43000</text>
+    <text x="410" y="72" font-size="12" class="mut">direct</text>
+    <text x="410" y="178" font-size="12" class="mut">took r1's</text>
+    <text x="20" y="254" font-size="13" class="mut">Steps 5, 6, 7 are downstream: marked touched, not re-run. The analyst runs them when you ask.</text>
+  </svg>
+  </div>
+  <div class="trail"><span>save guest_count = 150</span><i>→</i><span>re-run r1, map old→new outputs leaf by leaf</span><i>→</i><span>re-run r2</span><i>→</i><span>post "Decided on a branch…"</span><i>→</i><span>trunk node <code>value</code>, who: you</span></div>
+  <div class="where"><span>needs_you/join.py</span><span>answers/rerun.py · impact, rerun</span><span>examples/wedding/scenarios/branch_that_joins.json</span></div>
+</div>
+</section>
+
+<!-- ============ PRINCIPLE 5 ============ -->
+<section class="slide" data-p="5" data-title="P5 · Verification">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 5 · Verification · layer 5</span><span class="count"></span></div>
+  <h1>A reviewer challenges the plan.</h1>
+  <p class="big">Experts don't check every cell. They know where it usually goes wrong, and roughly what the answer should look like.</p>
+  <div class="cols">
+    <div class="card"><h3>Without it</h3><ul class="clean no"><li>Checking everything, line by line.</li><li>Or checking nothing.</li><li>No sense of what "about right" looks like.</li></ul></div>
+    <div class="card tint"><h3>With it</h3><ul class="clean yes"><li>"Is the guest count really settled?"</li><li>"Is the price per guest all in?"</li><li>Each challenge is yours to use or dismiss.</li></ul></div>
+  </div>
+  <div class="where"><span>harness/review/</span><span>reviewer.md</span><span>SPEC.md §7</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="5" data-title="P5 · The reviewer">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 5 · A separate look, on its own lane</span><span class="count"></span></div>
+  <h2>The reviewer sees the thinking, not the conversation</h2>
+  <div class="cols" style="--n:2">
+    <div class="card tint"><h3>Given</h3><ul class="clean yes small">
+      <li>The plan: goal, steps, formulas, origins, open questions</li>
+      <li>Built specs and their departures</li>
+      <li>Assumptions and their status · decisions · saved inputs</li>
+      <li>Last runs' inputs and outputs</li>
+      <li>Earlier challenges and your replies to them</li></ul></div>
+    <div class="card"><h3>Never given</h3><ul class="clean no small">
+      <li>The analyst's conversation or the main chat</li>
+      <li>Any module's code</li>
+      <li>Lookups with a digit in them (refused: nothing personal leaves)</li></ul></div>
+  </div>
+  <div class="flow">
+    <div class="node"><b>Trigger</b><span>plan accepted or changed · a new kind of assumption · a session opens on an accepted plan</span></div><div class="arr">→</div>
+    <div class="node"><b>Pass</b><span>review lane · ≤ 8 model calls · ≤ 4 lookups</span></div><div class="arr">→</div>
+    <div class="node key"><b>report</b><span>challenges: step, kind, concern, proposal, change, impact, sources</span></div><div class="arr">→</div>
+    <div class="node"><b>Filter</b><span>next slide</span></div>
+  </div>
+  <p class="small">Never blocks the main lane. A pass asked for while one runs is folded into one more.</p>
+  <div class="where"><span>review/reviewer.py</span><span>review/layer.py</span><span>core/lanes.py</span></div>
+</div>
+</section>
+
+<section class="slide" data-p="5" data-title="P5 · What survives">
+<div class="inner">
+  <div class="top"><span class="tag">Principle 5 · Few challenges, worth reading</span><span class="count"></span></div>
+  <h2>A challenge is kept only if it passes the same kind of checks</h2>
+  <div class="cols">
+    <div class="card"><h3>Kept only when</h3><ul class="clean small">
+      <li>It names a real plan step; title 1–45 characters</li>
+      <li>A <em>question</em> proposes nothing; a <em>challenge</em> proposes something</li>
+      <li>Every source URL came from a lookup in this pass</li>
+      <li>Its numbers pass the number check</li>
+      <li>It doesn't repeat an open, used or dismissed one</li></ul></div>
+    <div class="cols" style="--n:1">
+      <div class="card tint"><h3>Rank and cap</h3><p class="small">Sort by impact (high first), then the reviewer's order. Keep at most <code>min(3, 5 − open)</code>: never more than five open.</p></div>
+      <div class="card"><h3>Use this</h3><p class="small">Trunk node <code>challenge_used</code> (who: reviewer); your "use this" message goes to the analyst, and what it changes records its own node.</p></div>
+      <div class="card"><h3>Dismiss</h3><p class="small">The branch dies, dimmed. The plan stays as it was.</p></div>
+    </div>
+  </div>
+  <div class="where"><span>review/reviewer.py</span><span>tests/layer5/test_challenges.py</span><span>scenario review_the_plan</span></div>
+</div>
+</section>
+
+<!-- ============ CLOSING ============ -->
+<section class="slide" data-title="The decision history">
+<div class="inner">
+  <div class="top"><span class="tag">Tying it together</span><span class="count"></span></div>
+  <h2>The chat is a decision history: a trunk, and branches that join or die</h2>
+  <div class="svgw">
+  <svg viewBox="0 0 900 250" role="img" aria-label="Trunk of decisions with a joined branch, a dead branch and a reviewer branch">
+    <path d="M40 70 L860 70" class="trunk"/>
+    <circle cx="70" cy="70" r="9" class="nd"/><text x="50" y="44" font-size="13" font-weight="600">n1 Plan accepted</text>
+    <path d="M70 70 C120 70 130 160 200 160 L300 160 C360 160 370 70 420 70" class="br"/>
+    <text x="180" y="186" font-size="12" class="mono">branch t1: "no fewer than 150"</text>
+    <text x="180" y="204" font-size="12" class="mut">proposal 120 → 150 · Yes</text>
+    <circle cx="420" cy="70" r="9" class="nd4"/><text x="360" y="44" font-size="13" font-weight="600">n2 Guest count: 150 (was 120)</text>
+    <path d="M450 70 C490 70 500 150 560 150 L640 150" class="dead"/>
+    <text x="520" y="176" font-size="12" class="mut">"What is a sinking fund?" · closed, dead</text>
+    <circle cx="640" cy="70" r="9" class="nd4"/><text x="600" y="100" font-size="13" font-weight="600">n3 Confirmed…</text>
+    <path d="M660 70 C690 70 700 20 740 20 L790 20 C810 20 815 70 830 70" class="rv"/>
+    <text x="700" y="12" font-size="11" class="mut">reviewer challenge · Use this</text>
+    <circle cx="830" cy="70" r="9" class="nd5"/><text x="780" y="100" font-size="13" font-weight="600">n4 challenge_used</text>
+    <text x="40" y="236" font-size="13" class="mut">Node kinds: plan_accepted · plan_revised · value · assumption_confirmed · assumption_corrected · call · built · challenge_used</text>
+  </svg>
+  </div>
+  <div class="cols" style="--n:3">
+    <div class="card"><h3>Node</h3><p class="small">Who decided, a typed change, what it touched. Its text is written by the harness, never a model.</p></div>
+    <div class="card"><h3>Branch</h3><p class="small">About one subject: an input, a value, a result, an assumption, a step, or the whole plan.</p></div>
+    <div class="card tint"><h3>The rule</h3><p class="small">Nothing changes your figures or the plan's shape without your yes.</p></div>
+  </div>
+  <div class="where"><span>core/session.py · decide</span><span>harness/schema.sql · trunk</span><span>ARCHITECTURE.md §12</span></div>
+</div>
+</section>
+
+<section class="slide" data-title="Where to look">
+<div class="inner">
+  <div class="top"><span class="tag">Map</span><span class="count"></span></div>
+  <h2>Principle → code → tests → try it</h2>
+  <div class="tw"><table class="t">
+    <tr><th>Principle</th><th>Key files</th><th>Tests</th><th>Try it (README)</th></tr>
+    <tr><td><span class="pill-p" style="background:var(--p1)">1</span> Shared Domain</td><td class="mono">grounding/brief.py · interview.py · revise.py</td><td class="mono">tests/layer1</td><td>§3: correct step 2</td></tr>
+    <tr><td><span class="pill-p" style="background:var(--p2)">2</span> Consistency</td><td class="mono">calc/builder.py · checker.py · safety.py · gate.py</td><td class="mono">tests/layer2</td><td>§4: change <code>*</code> to <code>+</code></td></tr>
+    <tr><td><span class="pill-p" style="background:var(--p3)">3</span> Evidence</td><td class="mono">calc/provenance.py · answers/agent.py · figures.py</td><td class="mono">tests/layer3</td><td>§5: click 31,000</td></tr>
+    <tr><td><span class="pill-p" style="background:var(--p4)">4</span> Accountability</td><td class="mono">needs_you/marks.py · calls.py · side.py · join.py</td><td class="mono">tests/layer4</td><td>§6: 120 → 150 guests</td></tr>
+    <tr><td><span class="pill-p" style="background:var(--p5)">5</span> Verification</td><td class="mono">review/reviewer.py · layer.py</td><td class="mono">tests/layer5</td><td>§7: use / dismiss</td></tr>
+  </table></div>
+<pre><code>uv run pytest tests/layer3 -q                       <span class="k"># one principle's tests, later layers off</span>
+uv run python -m harness replay wedding branch_that_joins   <span class="k"># P4 against the real model</span>
+HARNESS_LAYERS=2 HARNESS_EXAMPLE=wedding uv run python -m harness ui   <span class="k"># see the harness up to P2</span></code></pre>
+  <div class="where"><span>README.md</span><span>examples/README.md</span><span>AGENTS.md</span></div>
+</div>
+</section>
+
+<section class="slide" data-title="Take it to your own harness">
+<div class="inner">
+  <div class="top"><span class="tag">Takeaways</span><span class="count"></span></div>
+  <h2>Five moves you can copy into any agent harness</h2>
+  <div class="cols" style="--n:1">
+    <div class="card" style="border-left:5px solid var(--p1)"><h3>Tag every fact with its origin, and verify the tag in code</h3><p class="small">A quote must be in the user's words; a source must come from a real lookup.</p></div>
+    <div class="card" style="border-left:5px solid var(--p2)"><h3>Let the model write tools once; never let it compute</h3><p class="small">Separate writers from checkers by what they can see. Run every call through a gate that re-tests.</p></div>
+    <div class="card" style="border-left:5px solid var(--p3)"><h3>Put a tripwire on output</h3><p class="small">Any number without a source is sent back, then withheld. Build receipts from your own records, not the model's prose.</p></div>
+    <div class="card" style="border-left:5px solid var(--p4)"><h3>Grade interruptions: never, mark, stop</h3><p class="small">Models propose changes; only the person's yes applies them.</p></div>
+    <div class="card" style="border-left:5px solid var(--p5)"><h3>Add a reviewer with a different view, and a filter on it</h3><p class="small">Cap, rank and source-check its challenges so they stay worth reading.</p></div>
+  </div>
+</div>
+</section>
+
+<nav class="toc" id="toc" hidden aria-label="Contents"><ol id="tocList"></ol></nav>
+</main>
+
+<div class="bar">
+  <button id="prev" type="button" aria-label="Previous slide">←</button>
+  <button id="next" type="button" aria-label="Next slide">→</button>
+  <button id="contents" type="button">Contents</button>
+  <div class="prog" aria-hidden="true"><i id="progFill"></i></div>
+  <span class="lbl" id="lbl"></span>
+</div>
+</div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var stage = document.getElementById("stage"), toc = document.getElementById("toc");
+  var fill = document.getElementById("progFill"), lbl = document.getElementById("lbl");
+  var colour = function (s) { var p = s.getAttribute("data-p"); return p ? "var(--p" + p + ")" : "var(--p0)"; };
+  var i = 0;
+  slides.forEach(function (s, n) {
+    var c = s.querySelector(".count"); if (c) c.textContent = (n + 1) + " / " + slides.length;
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#s" + (n + 1); a.style.setProperty("--c", colour(s));
+    a.innerHTML = "<b></b><i>" + (n + 1) + "</i><span></span>";
+    a.querySelector("span").textContent = s.getAttribute("data-title");
+    a.addEventListener("click", function (e) { e.preventDefault(); go(n); toc.hidden = true; });
+    li.appendChild(a); document.getElementById("tocList").appendChild(li);
+  });
+  function go(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, k) { s.classList.toggle("on", k === i); });
+    stage.scrollTop = 0;
+    fill.style.width = ((i + 1) / slides.length * 100) + "%";
+    fill.style.setProperty("--cur", colour(slides[i]));
+    lbl.textContent = (i + 1) + " / " + slides.length;
+    try { history.replaceState(null, "", "#s" + (i + 1)); } catch (e) {}
+  }
+  var m = /^#s(\d+)$/.exec(location.hash || "");
+  go(m ? parseInt(m[1], 10) - 1 : 0);
+  document.getElementById("prev").onclick = function () { go(i - 1); };
+  document.getElementById("next").onclick = function () { go(i + 1); };
+  document.getElementById("contents").onclick = function () { toc.hidden = !toc.hidden; };
+  document.addEventListener("keydown", function (e) {
+    if (e.target.closest && e.target.closest("input,textarea")) return;
+    if (e.key === "Escape") { toc.hidden = true; return; }
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(i + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(i - 1); }
+    else if (e.key === "Home") go(0);
+    else if (e.key === "End") go(slides.length - 1);
+    else if (e.key === "c") toc.hidden = !toc.hidden;
+  });
+  var x0 = null, y0 = null;
+  stage.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  stage.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(i + (dx < 0 ? 1 : -1));
+    x0 = null;
+  });
+})();
+</script>
